@@ -74,10 +74,10 @@ class TFTPServer(threading.Thread):
         packet += block.to_bytes(2, byteorder='big') # padded to 2 bytes size
         # adding data
         packet += data
-        self.serv_sock.sendto(packet, server)
+        self.serv_sock.sendto(packet, self.server)
 
     def run(self):
-        packet, address = self.serv_sock.recvfrom(1024)
+        packet, self.server = self.serv_sock.recvfrom(1024)
         filename = bytearray()
         byte = packet[2]
         i = 2
