@@ -79,9 +79,7 @@ class TFTPServer:
                 read.append(sock)
     
     def stop(self):
-
-
-
+        pass
 
 class Main:
 
