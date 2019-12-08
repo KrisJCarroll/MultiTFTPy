@@ -33,6 +33,7 @@ class TFTPServer(threading.Thread):
     }
 
     def __init__(self, source_port):
+        threading.Thread.__init__(self)
         self.serv_sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
         self.serv_sock.bind(('',source_port))
 
