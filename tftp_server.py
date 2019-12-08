@@ -76,7 +76,7 @@ class TFTPServer:
         packet += data
         self.serv_sock.sendto(packet, self.server)
 
-    def write(self, sock, filename):
+    def write(self, packet, sock, filename):
         file = open(filename, "rb")
         block = 0
         byte_data = file.read()
@@ -105,7 +105,7 @@ class TFTPServer:
             filename = filename.decode('ascii')
             if filename == "shutdown.txt":
                 exit()
-            new_thread = threading.Thread(target=self.write, args=(sock, filename), daemon=True).start()
+            new_thread = threading.Thread(target=self.write, args=(packet, sock, filename), daemon=True).start()
         
         
     
