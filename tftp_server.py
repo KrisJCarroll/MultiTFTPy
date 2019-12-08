@@ -7,7 +7,7 @@ import argparse
 import threading
 import select
 
-class TFTPServer:
+class TFTPServer(threading.Thread):
     TERMINATE_LENGTH = 512 + 4 # 512 bytes of data, 4 bytes header = 516 bytes maximum packet size
     ENCODE_MODE = 'netascii' # we're not expected to change this
 
@@ -96,5 +96,5 @@ class Main:
     SERVER_PORT = args.sp
     print("Server port:", SERVER_PORT)
 
-    server = TFTPServer(SERVER_PORT)
+    server = TFTPServer(SERVER_PORT).start()
     server.run()
