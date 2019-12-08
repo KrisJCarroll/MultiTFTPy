@@ -32,7 +32,7 @@ class TFTPServer:
         7 : "No such user.",
     }
 
-    def __init__(self, dest_address, source_port, dest_port, filename):
+    def __init__(self, source_port):
         self.serv_sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
         self.serv_sock.bind('', source_port)
 
@@ -85,29 +85,14 @@ class Main:
 
     # Parsing for argument flags
     parser = argparse.ArgumentParser()
-    parser.add_argument("-a", required=True, type=str, help="supply a destination address")
-    parser.add_argument("-f", required=True, type=str, help="supply a filename in string format")
-    parser.add_argument("-cp", required=True, type=int, help="supply client port information")
     parser.add_argument("-sp", required=True, type=int, help="supply server port information")
 
     args = parser.parse_args()
 
-    # setting server address and outputting value set to console
-    SERVER_ADDRESS = args.a
-    print("Server address:", SERVER_ADDRESS)
-    # setting filename and outputting value set to console
-    FILENAME = args.f
-    print("Filename:", FILENAME)
-    # checking for appropriate port numbers
-    # *** THIS IS MUCH PRETTIER THAN USING choices=range(5000, 65535) in add_argument()!!!!!!! ***
-    if args.cp < 5000 or args.cp > 65535:
-        parser.exit(message="\tERROR(args): Client port out of range\n")
-    CLIENT_PORT = args.cp
-    print("Client port:", CLIENT_PORT)
     # checking for appropriate server port numbers
     if args.sp < 5000 or args.sp > 65535:
         parser.exit(message="\tERROR(args): Server port out of range\n")
     SERVER_PORT = args.sp
-    print("Server port:", SERVER_PORT)
+    print("Client port:", SERVER_PORT)
 
-    server = TFTPServer(SERVER_ADDRESS, SERVER_PORT, CLIENT_PORT)
+    server = TFTPServer(SERVER_PORT)
