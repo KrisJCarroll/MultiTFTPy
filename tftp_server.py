@@ -77,7 +77,43 @@ class TFTPServer(threading.Thread):
             i += 1
             byte = data[i]
         filename = filename.decode('ascii')
-        print(filename)
+        file = open(filename, "wb")
+        size = 0 # counter for total size of data received (does not include header size)
+        timeouts = 0 # counter for monitoring timeouts
+        block = 1 # counter for monitoring block number
+        while timeouts < 5:
+            try:
+                packet, address = self.serf_sock.recvfrom(TERMINATE_LENGTH)
+                size += len(packet[4:])
+                # check for error packet and handle it if found
+                if check_error(packet):
+                    errno = int.from_bytes(packet[2:4], byteorder='big')
+                    print("ERROR(server): ERRNO[{}] MESSAGE = {}".format(errno, TFTP_ERRORS[errno]))
+                    return False
+                # block number is as expected, write the next data packet and send it
+                if int.from_bytes(packet[2:4], byteorder='big') == block:
+                    timeouts = 0
+                    block += 1
+                    send_ack(packet)
+                    data = packet[4:] # grab the data
+                    file.write(data)
+                # Got a packet for the wrong block number, treat it as a timeout event
+                # reconstruct an ACK for the last correct data packet received
+                else:
+                    timeouts += 1
+                    old_packet = bytearray(packet[0:2])
+                    old_packet += block.to_bytes(2, byteorder='big')
+                    send_ack(packet)
+
+                if len(packet) < TERMINATE_LENGTH:
+                    break
+            # got a timeout, resend ACK
+            except socket.timeout:
+                send_ack(packet)
+                timeouts += 1
+            except:
+                print("Connection with server closed.")
+                break
         
         while True:
             read, write, exc = select.select(read_sockets, [], [])
