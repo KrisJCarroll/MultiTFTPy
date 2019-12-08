@@ -74,7 +74,7 @@ class TFTPServer:
         packet += block.to_bytes(2, byteorder='big') # padded to 2 bytes size
         # adding data
         packet += data
-        self.serv_sock.sendto(packet, self.server)
+        self.serv_sock.sendto(packet, server)
 
     def write(self, packet, server, filename):
         file = open(filename, "rb")
