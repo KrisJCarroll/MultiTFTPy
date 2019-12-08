@@ -72,7 +72,7 @@ class TFTPServer(threading.Thread):
         filename = bytearray()
         byte = data[2]
         i = 2
-        while ord(byte) != 0:
+        while byte != 0:
             filename.append(byte)
             i += 1
             byte = data[i]
