@@ -52,10 +52,10 @@ class TFTPServer(threading.Thread):
         opcode = int.from_bytes(packet[0:2], byteorder='big')
         block_num = int.from_bytes(packet[2:4], byteorder='big')
         # packet is an ACK for the expected block number
-        if opcode == OPCODES['ack'] and block_num == block:
+        if opcode == TFTPServer.OPCODES['ack'] and block_num == block:
             return block
         # packet is an ACK
-        elif opcode == OPCODES['ack']:
+        elif opcode == TFTPServer.OPCODES['ack']:
             return block_num
         # packet isn't an ACK, we shouldn't be here, break everything
         else:
