@@ -93,19 +93,22 @@ class TFTPServer:
         self.serv_sock.close()
 
     def run(self):
+        read_socks = [self.serv_sock]
         while True:
-            packet, server = self.serv_sock.recvfrom(1024)
-            filename = bytearray()
-            byte = packet[2]
-            i = 2
-            while byte != 0:
-                filename.append(byte)
-                i += 1
-                byte = packet[i]
-            filename = filename.decode('ascii')
-            if filename == "shutdown.txt":
-                exit()
-            new_thread = threading.Thread(target=self.write, args=(packet, server, filename), daemon=True).start()
+            inputs, outputs, exc = select.select(read_socks, [], [])
+            for s in inputs:
+                packet, server = s.recvfrom(1024)
+                filename = bytearray()
+                byte = packet[2]
+                i = 2
+                while byte != 0:
+                    filename.append(byte)
+                    i += 1
+                    byte = packet[i]
+                filename = filename.decode('ascii')
+                if filename == "shutdown.txt":
+                    exit()
+                new_thread = threading.Thread(target=self.write, args=(packet, server, filename), daemon=True).start()
         
         
     
