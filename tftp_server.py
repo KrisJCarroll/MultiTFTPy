@@ -75,6 +75,7 @@ class TFTPServer:
 
             for socket in read:
                 sock, address = self.serv_sock.accept()
+                print("Connected to {}".format(address))
                 sock.settimeout(2)
                 read.append(sock)
     
