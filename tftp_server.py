@@ -67,7 +67,7 @@ class TFTPServer:
         opcode = data[0:2]
         return int.from_bytes(opcode, byteorder='big') == OPCODES["error"]
 
-    def send_data(self, ack, block, data):
+    def send_data(self, server, ack, block, data):
         packet = bytearray(ack[0:2])
         packet[1] = 3 # change ACK packet to DATA packet
         # adding block number
@@ -76,14 +76,14 @@ class TFTPServer:
         packet += data
         self.serv_sock.sendto(packet, self.server)
 
-    def write(self, packet, sock, filename):
+    def write(self, packet, server, filename):
         file = open(filename, "rb")
         block = 0
         byte_data = file.read()
         while True:
             data = byte_data[block*512 : (block*512) + 512] # get the correct data segment from block number
             block += 1 # increment the block number for next data packet
-            self.send_data(packet, block, data)
+            self.send_data(server, packet, block, data)
             if len(data) < 512 or block >= 65535:
                 break
             packet, address = self.serv_sock.recvfrom(TFTPServer.TERMINATE_LENGTH)
@@ -94,7 +94,7 @@ class TFTPServer:
 
     def run(self):
         while True:
-            packet, sock = self.serv_sock.recvfrom(1024)
+            packet, server = self.serv_sock.recvfrom(1024)
             filename = bytearray()
             byte = packet[2]
             i = 2
@@ -105,7 +105,7 @@ class TFTPServer:
             filename = filename.decode('ascii')
             if filename == "shutdown.txt":
                 exit()
-            new_thread = threading.Thread(target=self.write, args=(packet, sock, filename), daemon=True).start()
+            new_thread = threading.Thread(target=self.write, args=(packet, server, filename), daemon=True).start()
         
         
     
