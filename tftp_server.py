@@ -47,7 +47,7 @@ class TFTPServer(threading.Thread):
     #           expected block number in integer form
     # Returns: integer form of the block number ACK'ed
     # Raises TypeError (generic error) if the packet is not an ACK
-    def check_ack(packet, block):
+    def check_ack(self,packet, block):
         # turn the requisite data into integers for easier comparison and handling
         opcode = int.from_bytes(packet[0:2], byteorder='big')
         block_num = int.from_bytes(packet[2:4], byteorder='big')
