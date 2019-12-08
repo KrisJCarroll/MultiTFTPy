@@ -69,7 +69,10 @@ class TFTPServer(threading.Thread):
 
     def run(self):
         data, address = self.serv_sock.recvfrom(1024)
-        filename = data[2:].decode('ascii')
+        filename = bytearray()
+        byte = data[2]
+        while byte.from_bytes != 0:
+            filename.append(byte)
         print(filename)
         
         while True:
