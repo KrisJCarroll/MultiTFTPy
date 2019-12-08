@@ -69,7 +69,8 @@ class TFTPServer(threading.Thread):
 
     def run(self):
         data = self.serv_sock.recvfrom(1024)
-        print(data)
+        filename = data[2:].decode('ascii')
+        print(filename)
         
         while True:
             read, write, exc = select.select(read_sockets, [], [])
