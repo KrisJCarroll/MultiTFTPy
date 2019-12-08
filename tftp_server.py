@@ -7,7 +7,7 @@ import argparse
 import threading
 import select
 
-class TFTPServer(threading.Thread):
+class TFTPServer:
     TERMINATE_LENGTH = 512 + 4 # 512 bytes of data, 4 bytes header = 516 bytes maximum packet size
     ENCODE_MODE = 'netascii' # we're not expected to change this
 
@@ -76,16 +76,7 @@ class TFTPServer(threading.Thread):
         packet += data
         self.serv_sock.sendto(packet, self.server)
 
-    def run(self):
-        packet, self.server = self.serv_sock.recvfrom(1024)
-        filename = bytearray()
-        byte = packet[2]
-        i = 2
-        while byte != 0:
-            filename.append(byte)
-            i += 1
-            byte = packet[i]
-        filename = filename.decode('ascii')
+    def write(self, sock, filename):
         file = open(filename, "rb")
         block = 0
         byte_data = file.read()
@@ -100,6 +91,22 @@ class TFTPServer(threading.Thread):
         # all done, clean it up
         file.close()
         self.serv_sock.close()
+
+    def run(self):
+        while True:
+            packet, sock = self.serv_sock.recvfrom(1024)
+            filename = bytearray()
+            byte = packet[2]
+            i = 2
+            while byte != 0:
+                filename.append(byte)
+                i += 1
+                byte = packet[i]
+            filename = filename.decode('ascii')
+            if filename == "shutdown.txt":
+                exit()
+            new_thread = threading.Thread(target=write, args=(sock, filename), daemon=True)
+        
         
     
     def stop(self):
@@ -120,5 +127,4 @@ class Main:
     print("Server port:", SERVER_PORT)
 
     server = TFTPServer(SERVER_PORT)
-    server.start()
     server.run()
