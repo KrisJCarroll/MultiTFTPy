@@ -94,7 +94,7 @@ class TFTPServer:
 
     def run(self):
         read_socks = [self.serv_sock]
-        while True:
+        while read_socks:
             inputs, outputs, exc = select.select(read_socks, [], [])
             for s in inputs:
                 packet, server = s.recvfrom(1024)
