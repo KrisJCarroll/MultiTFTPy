@@ -94,7 +94,7 @@ class Main:
     if args.sp < 5000 or args.sp > 65535:
         parser.exit(message="\tERROR(args): Server port out of range\n")
     SERVER_PORT = args.sp
-    print("Client port:", SERVER_PORT)
+    print("Server port:", SERVER_PORT)
 
     server = TFTPServer(SERVER_PORT)
     server.run()
