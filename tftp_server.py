@@ -105,7 +105,7 @@ class TFTPServer:
             filename = filename.decode('ascii')
             if filename == "shutdown.txt":
                 exit()
-            new_thread = threading.Thread(target=self.write, args=(sock, filename), daemon=True)
+            new_thread = threading.Thread(target=self.write, args=(sock, filename), daemon=True).start()
         
         
     
