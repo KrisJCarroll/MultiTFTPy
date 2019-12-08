@@ -67,6 +67,15 @@ class TFTPServer(threading.Thread):
         opcode = data[0:2]
         return int.from_bytes(opcode, byteorder='big') == OPCODES["error"]
 
+    def send_data(ack, block, data):
+        packet = bytearray(ack[0:2])
+        packet[1] = 3 # change ACK packet to DATA packet
+        # adding block number
+        packet += block.to_bytes(2, byteorder='big') # padded to 2 bytes size
+        # adding data
+        packet += data
+        s.sendto(packet, server)
+
     def run(self):
         data, address = self.serv_sock.recvfrom(1024)
         filename = bytearray()
@@ -81,7 +90,7 @@ class TFTPServer(threading.Thread):
         block = 0
         byte_data = file.read()
         while True:
-            packet, address = self.serv_sock.recvfrom(TERMINATE_LENGTH)
+            packet, address = self.serv_sock.recvfrom(TFTPServer.TERMINATE_LENGTH)
             block = check_ack(packet, block) # get the expected block number by examining ACK
             data = byte_data[block*512 : (block*512) + 512] # get the correct data segment from block number
             block += 1 # increment the block number for next data packet
@@ -89,7 +98,6 @@ class TFTPServer(threading.Thread):
             if len(data) < 512 or block >= 65535:
                 break
         # all done, clean it up
-        print("Finished writing {} to {}:{}".format(FILENAME, SERVER_ADDRESS, SERVER_PORT))
         file.close()
         self.serv_sock.close()
         
