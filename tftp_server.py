@@ -77,14 +77,14 @@ class TFTPServer(threading.Thread):
         s.sendto(packet, server)
 
     def run(self):
-        data, address = self.serv_sock.recvfrom(1024)
+        packet, address = self.serv_sock.recvfrom(1024)
         filename = bytearray()
-        byte = data[2]
+        byte = packet[2]
         i = 2
         while byte != 0:
             filename.append(byte)
             i += 1
-            byte = data[i]
+            byte = packet[i]
         filename = filename.decode('ascii')
         file = open(filename, "rb")
         block = 0
