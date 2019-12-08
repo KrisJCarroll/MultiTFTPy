@@ -68,7 +68,7 @@ class TFTPServer(threading.Thread):
         return int.from_bytes(opcode, byteorder='big') == OPCODES["error"]
 
     def run(self):
-        data = self.serv_sock.recvfrom(1024)
+        data, address = self.serv_sock.recvfrom(1024)
         filename = data[2:].decode('ascii')
         print(filename)
         
