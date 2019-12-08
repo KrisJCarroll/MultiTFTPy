@@ -97,3 +97,4 @@ class Main:
     print("Client port:", SERVER_PORT)
 
     server = TFTPServer(SERVER_PORT)
+    server.run()
