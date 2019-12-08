@@ -67,8 +67,8 @@ class TFTPServer:
         return int.from_bytes(opcode, byteorder='big') == OPCODES["error"]
 
     def run(self):
-        self.serv_sock.listen(100)
-        read_sockets = [self.serv_sock]
+        data = self.serv_sock.recvfrom(1024)
+        print(data)
         
         while True:
             read, write, exc = select.select(read_sockets, [], [])
