@@ -93,14 +93,6 @@ class TFTPServer(threading.Thread):
         file.close()
         self.serv_sock.close()
         
-        while True:
-            read, write, exc = select.select(read_sockets, [], [])
-
-            for socket in read:
-                sock, address = self.serv_sock.accept()
-                print("Connected to {}".format(address))
-                sock.settimeout(2)
-                read.append(sock)
     
     def stop(self):
         pass
