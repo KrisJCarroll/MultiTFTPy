@@ -71,8 +71,11 @@ class TFTPServer(threading.Thread):
         data, address = self.serv_sock.recvfrom(1024)
         filename = bytearray()
         byte = data[2]
-        while byte.from_bytes != 0:
+        i = 2
+        while ord(byte) != 0:
             filename.append(byte)
+            i += 1
+            byte = data[i]
         print(filename)
         
         while True:
