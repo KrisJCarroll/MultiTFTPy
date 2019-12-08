@@ -34,7 +34,7 @@ class TFTPServer:
 
     def __init__(self, source_port):
         self.serv_sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-        self.serv_sock.bind('', source_port)
+        self.serv_sock.bind(source_port)
 
     def send_ack(packet):
         ack = bytearray(packet[0:4])
