@@ -37,7 +37,7 @@ class TFTPServer(threading.Thread):
         self.serv_sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
         self.serv_sock.bind(('',source_port))
 
-    def send_ack(packet):
+    def send_ack(self, packet):
         ack = bytearray(packet[0:4])
         ack[1] = 4 # change opcode to 04
         s.sendto(ack, server)
