@@ -95,6 +95,7 @@ class TFTPServer(threading.Thread):
             data = byte_data[block*512 : (block*512) + 512] # get the correct data segment from block number
             block += 1 # increment the block number for next data packet
             send_data(packet, block, data)
+            print(data)
             if len(data) < 512 or block >= 65535:
                 break
         # all done, clean it up
