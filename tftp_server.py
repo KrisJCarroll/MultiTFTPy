@@ -76,7 +76,7 @@ class TFTPServer(threading.Thread):
             filename.append(byte)
             i += 1
             byte = data[i]
-        filename = filename.decode('netascii')
+        filename = filename.decode('ascii')
         print(filename)
         
         while True:
