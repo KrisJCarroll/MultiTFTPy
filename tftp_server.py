@@ -138,3 +138,52 @@ class Main:
     # let the fun begin...
     server = TFTPServer(SERVER_PORT)
     server.run()
+
+ 
+# Class for handling unit tests for packets
+class TFTPyPacket:
+
+    OPCODES = {
+        'unknown' : 0,
+        'read' : 1,
+        'write' : 2,
+        'data' : 3,
+        'ack' : 4,
+        'error' : 5
+    }
+
+    def create_request(mode, filename):
+        packet = bytearray()
+        packet.append(0)
+        try:
+            packet.append(TFTPyPacket.OPCODES[mode])
+            request = request + bytearray(filename.encode('ascii'))
+            request.append(0)
+            request = request + bytearray(ENCODE_MODE.encode('ascii'))
+            request.append(0)
+        except:
+            raise TypeError('invalid mode')
+        return packet
+
+    def create_data_pkt(block_num, data):
+        if len(data) > 512:
+            raise SyntaxError('data is too large for TFTP')
+        packet = bytearray()
+        packet.append(0)
+        packet.append(TFTPyPacket.OPCODES['data'])
+        packet += block_num.to_bytes(2, byteorder='big')
+        packet += data
+        return packet
+
+    def create_ack(block_num):
+        packet = bytearray()
+        packet.append(0)
+        packet.append(TFTPyPacket.OPCODES['ack'])
+        packet += block_num.to_bytes(2, byteorder='big')
+        return packet
+
+    def process_data(packet):
+        data = packet[4:]
+        if len(data) > 512:
+            raise TypeError('data is too large for TFTP')
+        return data
