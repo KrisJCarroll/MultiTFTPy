@@ -6,6 +6,7 @@ import socket
 import argparse
 import threading
 import select
+import random
 
 class TFTPServer:
     TERMINATE_LENGTH = 512 + 4 # 512 bytes of data, 4 bytes header = 516 bytes maximum packet size
@@ -67,30 +68,30 @@ class TFTPServer:
         opcode = data[0:2]
         return int.from_bytes(opcode, byteorder='big') == OPCODES["error"]
 
-    def send_data(self, server, ack, block, data):
+    def send_data(self, sock, server, ack, block, data):
         packet = bytearray(ack[0:2])
         packet[1] = 3 # change ACK packet to DATA packet
         # adding block number
         packet += block.to_bytes(2, byteorder='big') # padded to 2 bytes size
         # adding data
         packet += data
-        self.serv_sock.sendto(packet, server)
+        sock.sendto(packet, server)
 
-    def write(self, packet, server, filename):
+    def write(self, sock, packet, server, filename):
         file = open(filename, "rb")
         block = 0
         byte_data = file.read()
         while True:
             data = byte_data[block*512 : (block*512) + 512] # get the correct data segment from block number
             block += 1 # increment the block number for next data packet
-            self.send_data(server, packet, block, data)
+            self.send_data(sock, server, packet, block, data)
             if len(data) < 512 or block >= 65535:
                 break
-            packet, address = self.serv_sock.recvfrom(TFTPServer.TERMINATE_LENGTH)
+            packet, address = sock.recvfrom(TFTPServer.TERMINATE_LENGTH)
             block = self.check_ack(packet, block) # get the expected block number by examining ACK
         # all done, clean it up
         file.close()
-        self.serv_sock.close()
+        sock.close()
 
     def run(self):
         
@@ -100,6 +101,9 @@ class TFTPServer:
             for s in inputs:
                 if s is self.serv_sock:
                     packet, server = s.recvfrom(1024)
+                    new_sock = socket.socket(socket.AF_INET,socket.SOCK_DGRAM)
+                    new_sock.bind('', random.randint(5000, 65535))
+                    read_socks.append(new_sock)
                     filename = bytearray()
                     byte = packet[2]
                     i = 2
@@ -110,7 +114,7 @@ class TFTPServer:
                     filename = filename.decode('ascii')
                     if filename == "shutdown.txt":
                         exit()
-                    new_thread = threading.Thread(target=self.write, args=(packet, server, filename), daemon=True).start()
+                    new_thread = threading.Thread(target=self.write, args=(new_sock, packet, server, filename), daemon=True).start()
         
         
     
