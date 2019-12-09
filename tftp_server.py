@@ -98,18 +98,19 @@ class TFTPServer:
             read_socks = [self.serv_sock]
             inputs, outputs, exc = select.select(read_socks, [], [])
             for s in inputs:
-                packet, server = s.recvfrom(1024)
-                filename = bytearray()
-                byte = packet[2]
-                i = 2
-                while byte != 0:
-                    filename.append(byte)
-                    i += 1
-                    byte = packet[i]
-                filename = filename.decode('ascii')
-                if filename == "shutdown.txt":
-                    exit()
-                new_thread = threading.Thread(target=self.write, args=(packet, server, filename), daemon=True).start()
+                if s is self.serv_sock:
+                    packet, server = s.recvfrom(1024)
+                    filename = bytearray()
+                    byte = packet[2]
+                    i = 2
+                    while byte != 0:
+                        filename.append(byte)
+                        i += 1
+                        byte = packet[i]
+                    filename = filename.decode('ascii')
+                    if filename == "shutdown.txt":
+                        exit()
+                    new_thread = threading.Thread(target=self.write, args=(packet, server, filename), daemon=True).start()
         
         
     
