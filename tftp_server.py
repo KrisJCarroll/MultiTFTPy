@@ -118,7 +118,6 @@ class TFTPServer:
             # received from someone else, put it in their Queue
             else:
                 connections[server].put(packet)
-                time.sleep(0.2)
         
         
     
