@@ -82,14 +82,24 @@ class TFTPServer:
         file = open(filename, "rb")
         block = 0
         byte_data = file.read()
+        timeouts = 0
         while True:
-            data = byte_data[block*512 : (block*512) + 512] # get the correct data segment from block number
-            block += 1 # increment the block number for next data packet
-            self.send_data(sock, server, packet, block, data)
-            if len(data) < 512 or block >= 65535:
-                break
-            packet = queue.get(block=True)
-            block = self.check_ack(packet, block) # get the expected block number by examining ACK
+            try:
+                data = byte_data[block*512 : (block*512) + 512] # get the correct data segment from block number
+                block += 1 # increment the block number for next data packet
+                self.send_data(sock, server, packet, block, data)
+                expected_block = block
+                if len(data) < 512 or block >= 65535:
+                    break
+                packet = queue.get(block=True)
+                block = self.check_ack(packet, block) # get the expected block number by examining ACK
+                if block != expected_block:
+                    timeouts += 1
+                    block = expected_block
+                timeouts = 0
+            except socket.timeout:
+                block -= 1
+                timeouts += 1
         # all done, clean it up
         file.close()
         sock.close()
@@ -103,6 +113,7 @@ class TFTPServer:
                 connections[server] = Queue()
                 new_sock = socket.socket(socket.AF_INET,socket.SOCK_DGRAM)
                 new_sock.bind(('', random.randint(5000, 65535)))
+                new_sock.settimeout(3)
                 filename = bytearray()
                 byte = packet[2]
                 i = 2
