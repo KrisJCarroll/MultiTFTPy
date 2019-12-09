@@ -77,7 +77,8 @@ class TFTPServer:
         packet += data
         sock.sendto(packet, server)
 
-    def write(self, sock, queue, packet, server, filename):
+    # main worker thread method for handling sending of files
+    def send(self, sock, queue, packet, server, filename):
         file = open(filename, "rb")
         block = 0
         byte_data = file.read()
@@ -113,15 +114,11 @@ class TFTPServer:
                 # checking  for shutdown connection, an RRQ for shutdown.txt
                 if filename == "shutdown.txt" and int.from_bytes(packet[0:2],byteorder='big') == 1:
                     exit()
-                new_thread = threading.Thread(target=self.write, args=(new_sock, connections[server], packet, server, filename), daemon=True).start()
+                new_thread = threading.Thread(target=self.send, args=(new_sock, connections[server], packet, server, filename), daemon=True).start()
             # received from someone else, put it in their Queue for their inspection
             else:
                 connections[server].put(packet)
         
-        
-    
-    def stop(self):
-        pass
 
 class Main:
 
@@ -137,5 +134,6 @@ class Main:
     SERVER_PORT = args.sp
     print("Server port:", SERVER_PORT)
 
+    # let the fun begin...
     server = TFTPServer(SERVER_PORT)
     server.run()
