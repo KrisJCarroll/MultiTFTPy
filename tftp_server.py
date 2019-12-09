@@ -105,7 +105,6 @@ class TFTPServer:
                     packet, server = s.recvfrom(1024)
                     new_sock = socket.socket(socket.AF_INET,socket.SOCK_DGRAM)
                     new_sock.bind(('', random.randint(5000, 65535)))
-                    read_socks.append(new_sock)
                     filename = bytearray()
                     byte = packet[2]
                     i = 2
