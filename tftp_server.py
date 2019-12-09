@@ -83,7 +83,7 @@ class TFTPServer:
         block = 0
         byte_data = file.read()
         timeouts = 0
-        while True:
+        while timeouts < 5:
             try:
                 data = byte_data[block*512 : (block*512) + 512] # get the correct data segment from block number
                 block += 1 # increment the block number for next data packet
@@ -96,6 +96,7 @@ class TFTPServer:
                 if block != expected_block:
                     timeouts += 1
                     block = expected_block
+                    continue
                 timeouts = 0
             except socket.timeout:
                 block -= 1
