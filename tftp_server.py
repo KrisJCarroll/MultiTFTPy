@@ -106,6 +106,7 @@ class TFTPServer:
                 filename = bytearray()
                 byte = packet[2]
                 i = 2
+                # grabbing filename
                 while byte != 0:
                     filename.append(byte)
                     i += 1
