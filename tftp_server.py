@@ -115,6 +115,7 @@ class TFTPServer:
                     exit()
                 new_thread = threading.Thread(target=self.write, args=(new_sock, packet, server, filename), daemon=True).start()
             else:
+                print(server)
                 time.sleep(0.2)
         
         
