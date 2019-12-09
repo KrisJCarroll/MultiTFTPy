@@ -96,26 +96,23 @@ class TFTPServer:
         sock.close()
 
     def run(self):
-        
+        connections = []
         while True:
-            read_socks = [self.serv_sock]
-            inputs, outputs, exc = select.select(read_socks, [], [])
-            for s in inputs:
-                if s is self.serv_sock:
-                    packet, server = s.recvfrom(1024)
-                    new_sock = socket.socket(socket.AF_INET,socket.SOCK_DGRAM)
-                    new_sock.bind(('', random.randint(5000, 65535)))
-                    filename = bytearray()
-                    byte = packet[2]
-                    i = 2
-                    while byte != 0:
-                        filename.append(byte)
-                        i += 1
-                        byte = packet[i]
-                    filename = filename.decode('ascii')
-                    if filename == "shutdown.txt":
-                        exit()
-                    new_thread = threading.Thread(target=self.write, args=(new_sock, packet, server, filename), daemon=True).start()
+            packet, server = self.serv_sock.recvfrom(1024)
+            if server not in connections:
+                new_sock = socket.socket(socket.AF_INET,socket.SOCK_DGRAM)
+                new_sock.bind(('', random.randint(5000, 65535)))
+                filename = bytearray()
+                byte = packet[2]
+                i = 2
+                while byte != 0:
+                    filename.append(byte)
+                    i += 1
+                    byte = packet[i]
+                filename = filename.decode('ascii')
+                if filename == "shutdown.txt":
+                    exit()
+                new_thread = threading.Thread(target=self.write, args=(new_sock, packet, server, filename), daemon=True).start()
             else:
                 time.sleep(0.2)
         
