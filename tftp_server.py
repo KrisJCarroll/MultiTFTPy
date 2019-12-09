@@ -114,7 +114,7 @@ class TFTPServer:
                 filename = filename.decode('ascii')
                 if filename == "shutdown.txt":
                     exit()
-                new_thread = threading.Thread(target=self.write, args=(new_sock, packet, server, filename), daemon=True).start()
+                new_thread = threading.Thread(target=self.write, args=(new_sock, connections[server], packet, server, filename), daemon=True).start()
             # received from someone else, put it in their Queue
             else:
                 connections[server].put(packet)
