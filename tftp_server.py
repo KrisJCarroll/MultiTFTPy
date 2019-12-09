@@ -100,6 +100,7 @@ class TFTPServer:
         while True:
             packet, server = self.serv_sock.recvfrom(1024)
             if server not in connections:
+                connections.append(server)
                 new_sock = socket.socket(socket.AF_INET,socket.SOCK_DGRAM)
                 new_sock.bind(('', random.randint(5000, 65535)))
                 filename = bytearray()
