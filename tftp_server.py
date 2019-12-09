@@ -111,7 +111,7 @@ class TFTPServer:
                     byte = packet[i]
                 filename = filename.decode('ascii')
                 # checking  for shutdown connection, an RRQ for shutdown.txt
-                if filename == "shutdown.txt" and int.from_bytes(packet[0:2] == 1,byteorder='big'):
+                if filename == "shutdown.txt" and int.from_bytes(packet[0:2],byteorder='big') == 1:
                     exit()
                 new_thread = threading.Thread(target=self.write, args=(new_sock, connections[server], packet, server, filename), daemon=True).start()
             # received from someone else, put it in their Queue for their inspection
