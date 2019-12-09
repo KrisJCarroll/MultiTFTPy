@@ -41,10 +41,6 @@ class TFTPServer:
         self.serv_sock.bind(('',source_port))
         self.serv_sock.setblocking(1)
 
-    def send_ack(self, packet):
-        ack = bytearray(packet[0:4])
-        ack[1] = 4 # change opcode to 04
-        s.sendto(ack, server)
 
     # Used to check ACKs during write operations
     # Requires: previously acquired packet in bytes object
@@ -71,6 +67,7 @@ class TFTPServer:
         opcode = data[0:2]
         return int.from_bytes(opcode, byteorder='big') == OPCODES["error"]
 
+    # basic method for sending data to a connection with the passed socket
     def send_data(self, sock, server, ack, block, data):
         packet = bytearray(ack[0:2])
         packet[1] = 3 # change ACK packet to DATA packet
@@ -96,8 +93,9 @@ class TFTPServer:
         file.close()
         sock.close()
 
+    # master process for handling all connections
     def run(self):
-        connections = {}
+        connections = {} # dictionary for maintaining connections
         while True:
             packet, server = self.serv_sock.recvfrom(1024)
             if server not in connections:
@@ -112,10 +110,11 @@ class TFTPServer:
                     i += 1
                     byte = packet[i]
                 filename = filename.decode('ascii')
-                if filename == "shutdown.txt":
+                # checking  for shutdown connection, an RRQ for shutdown.txt
+                if filename == "shutdown.txt" and int.from_bytes(packet[0:2] == 1):
                     exit()
                 new_thread = threading.Thread(target=self.write, args=(new_sock, connections[server], packet, server, filename), daemon=True).start()
-            # received from someone else, put it in their Queue
+            # received from someone else, put it in their Queue for their inspection
             else:
                 connections[server].put(packet)
         
