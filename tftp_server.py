@@ -7,6 +7,7 @@ import argparse
 import threading
 import select
 import random
+import sys
 
 class TFTPServer:
     TERMINATE_LENGTH = 512 + 4 # 512 bytes of data, 4 bytes header = 516 bytes maximum packet size
@@ -116,6 +117,8 @@ class TFTPServer:
                     if filename == "shutdown.txt":
                         exit()
                     new_thread = threading.Thread(target=self.write, args=(new_sock, packet, server, filename), daemon=True).start()
+            else:
+                sys.sleep(0.2)
         
         
     
