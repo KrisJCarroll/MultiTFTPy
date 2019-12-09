@@ -8,6 +8,7 @@ import threading
 import select
 import random
 import time
+from queue import Queue
 
 class TFTPServer:
     TERMINATE_LENGTH = 512 + 4 # 512 bytes of data, 4 bytes header = 516 bytes maximum packet size
@@ -79,7 +80,7 @@ class TFTPServer:
         packet += data
         sock.sendto(packet, server)
 
-    def write(self, sock, packet, server, filename):
+    def write(self, sock, queue, packet, server, filename):
         file = open(filename, "rb")
         block = 0
         byte_data = file.read()
@@ -89,18 +90,18 @@ class TFTPServer:
             self.send_data(sock, server, packet, block, data)
             if len(data) < 512 or block >= 65535:
                 break
-            packet, address = sock.recvfrom(TFTPServer.TERMINATE_LENGTH)
+            packet = queue.get(block=True)
             block = self.check_ack(packet, block) # get the expected block number by examining ACK
         # all done, clean it up
         file.close()
         sock.close()
 
     def run(self):
-        connections = []
+        connections = {}
         while True:
             packet, server = self.serv_sock.recvfrom(1024)
             if server not in connections:
-                connections.append(server)
+                connections[server] = Queue()
                 new_sock = socket.socket(socket.AF_INET,socket.SOCK_DGRAM)
                 new_sock.bind(('', random.randint(5000, 65535)))
                 filename = bytearray()
@@ -114,8 +115,9 @@ class TFTPServer:
                 if filename == "shutdown.txt":
                     exit()
                 new_thread = threading.Thread(target=self.write, args=(new_sock, packet, server, filename), daemon=True).start()
+            # received from someone else, put it in their Queue
             else:
-                print(server)
+                connections[server].put(packet)
                 time.sleep(0.2)
         
         
